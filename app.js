@@ -1,7 +1,10 @@
+"use strict";
+
 const emptyChar = "#";
 
 function createGridOfNElements(size) {
-  return (myGrid = [...Array(size)].map((e) => Array(size).fill(emptyChar)));
+  const myGrid = [...Array(size)].map((e) => Array(size).fill(emptyChar));
+  return myGrid;
 }
 
 function randomLetters(length) {
@@ -37,26 +40,23 @@ function fillBlanks(matrix) {
   return newMatrix;
 }
 
-function checkHorizontal(arr, str, col) {
-  if (str.length <= arr.length - col) {
-    let char = 0;
-    for (let i = col; i <= col + str.length - 1; i++) {
-      if (!(arr[i] == emptyChar || arr[i] == str[char])) {
-        return false;
-      }
-      char++;
+function validateHorizontalInsertion(arr, str, col) {
+  if (!(str.length <= arr.length - col)) return false;
+
+  const colRange = col + str.length;
+  const arrPortion = arr.slice(col, colRange);
+  for (const [i, char] of arrPortion.entries()) {
+    if (!(char === emptyChar || char === str[i])) {
+      return false;
     }
-  } else {
-    console.log("Tamaño insuficiente");
-    return false;
+    return true;
   }
-  return true;
 }
 
 const insertHorizontal = (matrix, str, row, col) => {
   console.log(`Horizontal insertion of -${str}- on row ${row} and col ${col}`);
 
-  if (!checkHorizontal(matrix[row], str, col)) return matrix;
+  if (!validateHorizontalInsertion(matrix[row], str, col)) return matrix;
 
   let newMatrix = [...matrix];
   newMatrix[row].splice(col, str.length, ...[...str]);
@@ -102,7 +102,7 @@ function insertVertical(matrix, str, row, col) {
 
   if (!validateVerticalInsertion(matrix, str, row, col)) return false;
 
-  newMatrix = [...matrix];
+  const newMatrix = [...matrix];
 
   const rowRange = row + str.length;
   const rows = newMatrix.slice(row, rowRange);
@@ -394,7 +394,7 @@ function createSoup(grid, values) {
   return ultimateSoup;
 }
 
-values = [
+const values = [
   "pedro",
   "selene",
   "gaston",
@@ -416,9 +416,9 @@ values = [
   "mauricio",
 ];
 
-e = createGridOfNElements(9);
+let e = createGridOfNElements(9);
 
-// e = insertVertical(e, "eugenias", 0, 0);
+e = insertVertical(e, "eugenias", 0, 0);
 // e = insertVertical(e, "otomos", 0, 4);
 // e = insertVertical(e, "otomos", 3, 4);
 // e = insertVertical(e, "moses", 3, 4);
@@ -428,7 +428,7 @@ e = createGridOfNElements(9);
 e = insertHorizontal(e, "gaston", 1, 0);
 e = insertHorizontal(e, "ogastonios", 1, 0);
 e = insertHorizontal(e, "gas", 1, 5);
-e = insertHorizontal(e, "gastonio", 1, 0);
+e = insertHorizontal(e, "gastonio", 2, 0);
 console.log(e);
 
 // insertDiagonalDown(e, 'eugenia', 1, 1);
