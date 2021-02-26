@@ -40,7 +40,10 @@ function fillBlanks(matrix) {
   return newMatrix;
 }
 
+//  ------------ INSERTION ------------ //
+
 function validateHorizontalInsertion(arr, str, col) {
+  // if str does not fit in the grid, return.
   if (!(str.length <= arr.length - col)) return false;
 
   const colRange = col + str.length;
@@ -64,25 +67,8 @@ const insertHorizontal = (matrix, str, row, col) => {
   return newMatrix;
 };
 
-// function insertHorizontal(matrix, str, row, col) {
-//   console.log("Inserción: horizontal");
-//   console.log(row, col);
-
-//   let arr = matrix[row];
-
-//   if (checkHorizontal(arr, col, str)) {
-//     let char = 0;
-//     for (let i = col; i <= col + str.length - 1; i++) {
-//       arr[i] = str[char];
-//       char++;
-//     }
-//     return true;
-//   }
-//   return false;
-// }
-
 function validateVerticalInsertion(matrix, str, row, col) {
-  // if str does not fit in the grid, break.
+  // if str does not fit in the grid, return.
   if (!(str.length <= matrix.length - row)) return false;
 
   const rowRange = row + str.length;
@@ -111,62 +97,58 @@ function insertVertical(matrix, str, row, col) {
   return newMatrix;
 }
 
-function checkDiagonalDown(matrix, row, col, value) {
-  const grid = matrix.length;
-
-  if (value.length <= grid - col && value.length <= grid - row) {
-    let char = 0;
-
-    for (
-      let i = row, j = col;
-      i <= row + value.length - 1 && j <= col + value.length - 1;
-      i++, j++
-    ) {
-      if (!(matrix[i][j] == emptyChar || matrix[i][j] == value[char])) {
-        return false;
-      }
-      char++;
-    }
-  } else {
-    console.log("Tamaño insuficiente");
+function validatekDiagonalDownInsertion(matrix, str, row, col) {
+  const matrixSize = matrix.length;
+  // if str does not fit in the grid, return.
+  if (!(str.length <= matrixSize - col && str.length <= matrixSize - row))
     return false;
+
+  const rowRange = row + str.length;
+  const rows = matrix.slice(row, rowRange);
+
+  for (const [i, row] of rows.entries()) {
+    if (!(row[col] === emptyChar || row[col] === str[i])) {
+      return false;
+    }
+    col++;
   }
   return true;
 }
 
 function insertDiagonalDown(matrix, str, row, col) {
-  console.log("Inserción: diagonal abajo");
-  console.log(row, col);
+  console.log(
+    `Diagonal down insertion of -${str}- on row ${row} and col ${col}`
+  );
 
-  if (checkDiagonalDown(matrix, row, col, str)) {
-    let char = 0;
+  if (!validatekDiagonalDownInsertion(matrix, str, row, col)) return matrix;
 
-    for (
-      let i = row, j = col;
-      i <= row + str.length - 1 && j <= col + str.length - 1;
-      i++, j++
-    ) {
-      matrix[i][j] = str[char];
-      char++;
-    }
-    return true;
-  }
-  return false;
+  const newMatrix = [...matrix];
+
+  const rowRange = row + str.length;
+
+  const rows = newMatrix.slice(row, rowRange);
+
+  rows.forEach(function (arr, i) {
+    arr.splice(col, 1, str[i]);
+    col++;
+  });
+
+  return newMatrix;
 }
 
-function checkDiagonalUp(matrix, row, col, value) {
+function validatekDiagonalUpInsertion(matrix, str, row, col) {
   const grid = matrix.length;
 
   if (!(col >= grid || row >= grid)) {
-    if (value.length <= grid - col && value.length - 1 <= row) {
+    if (str.length <= grid - col && str.length - 1 <= row) {
       let char = 0;
 
       for (
         let i = row, j = col;
-        i >= row - value.length - 1 && j <= col + value.length - 1;
+        i >= row - str.length - 1 && j <= col + str.length - 1;
         i--, j++
       ) {
-        if (!(matrix[i][j] == emptyChar || matrix[i][j] == value[char])) {
+        if (!(matrix[i][j] == emptyChar || matrix[i][j] == str[char])) {
           return false;
         }
         char++;
@@ -181,24 +163,44 @@ function checkDiagonalUp(matrix, row, col, value) {
   return false;
 }
 
+// function insertDiagonalUp(matrix, str, row, col) {
+//   console.log("Inserción: diagonal arriba");
+//   console.log(row, col);
+
+//   if (checkDiagonalUp(matrix, row, col, str)) {
+//     let char = 0;
+
+//     for (
+//       let i = row, j = col;
+//       i >= row - str.length - 1 && j <= col + str.length - 1;
+//       i--, j++
+//     ) {
+//       matrix[i][j] = str[char];
+//       char++;
+//     }
+//     return true;
+//   }
+//   return false;
+// }
+
 function insertDiagonalUp(matrix, str, row, col) {
-  console.log("Inserción: diagonal arriba");
-  console.log(row, col);
+  console.log(`Diagonal up insertion of -${str}- on row ${row} and col ${col}`);
 
-  if (checkDiagonalUp(matrix, row, col, str)) {
-    let char = 0;
+  if (!validatekDiagonalUpInsertion(matrix, str, row, col)) return matrix;
 
-    for (
-      let i = row, j = col;
-      i >= row - str.length - 1 && j <= col + str.length - 1;
-      i--, j++
-    ) {
-      matrix[i][j] = str[char];
-      char++;
-    }
-    return true;
-  }
-  return false;
+  const newMatrix = [...matrix.reverse()];
+  console.log(newMatrix);
+  const rowRange = row + str.length;
+  console.log(row, rowRange);
+  const rows = newMatrix.slice(row, rowRange);
+  console.log(rows);
+
+  rows.forEach(function (arr, i) {
+    arr.splice(col, 1, str[i]);
+    col++;
+  });
+
+  return newMatrix.reverse();
 }
 
 function toUpper(values) {
@@ -424,25 +426,29 @@ e = insertVertical(e, "eugenias", 0, 0);
 // e = insertVertical(e, "moses", 3, 4);
 // console.log(e);
 
-// insertHorizontal(e, "gaston", 1, 0);
 e = insertHorizontal(e, "gaston", 1, 0);
 e = insertHorizontal(e, "ogastonios", 1, 0);
 e = insertHorizontal(e, "gas", 1, 5);
 e = insertHorizontal(e, "gastonio", 2, 0);
-console.log(e);
 
-// insertDiagonalDown(e, 'eugenia', 1, 1);
-// insertDiagonalDown(e, 'seugenia', 0, 0);
-// insertDiagonalDown(e, 'geniasa', 3, 3);
+insertDiagonalDown(e, "eugenia", 1, 1);
+insertDiagonalDown(e, "seugenia", 0, 0);
+insertDiagonalDown(e, "geniasa", 3, 3);
 
 // checking overlaps:
 // insertHorizontal(e, 'pepipo', 3, 3);
 // insertDiagonalDown(e, 'pepipo', 3, 3 );
 // insertVertical(e, 'pepipo', 1, 5);
 
+e = insertDiagonalDown(e, "tomas", 2, 3);
+e = insertDiagonalDown(e, "sara", 2, 2);
+e = insertDiagonalDown(e, "ana", 5, 5);
+
 // insertDiagonalUp(e, 'javier', 7, 0);
-// insertDiagonalDown(e, 'javier', 2,2);
-// console.log(e);
+// e = insertDiagonalUp(e, "javi", 7, 0);
+e = insertDiagonalUp(e, "motor", 7, 1);
+console.log("");
+console.log(e);
 
 // for (let i = 9, j = 5; i >= 5 || j <= 10; i--, j++) {
 //     console.log(i, j);
