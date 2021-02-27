@@ -19,25 +19,13 @@ function randomLetters(length) {
 const randomLetter = () => randomLetters(1);
 
 function fillEmptyChars(matrix) {
-  const grid = matrix.length;
+  const newMatrix = [...matrix];
 
-  console.log(grid);
-
-  let newMatrix = [];
-  for (var i = 0; i < grid; i++) {
-    newMatrix[i] = new Array(grid);
-  }
-
-  for (let i = 0; i <= grid - 1; i++) {
-    for (let j = 0; j <= grid - 1; j++) {
-      if (matrix[i][j] == emptyChar) {
-        newMatrix[i][j] = randomLetter().toUpperCase();
-      } else {
-        newMatrix[i][j] = matrix[i][j];
-      }
-    }
-  }
-  return newMatrix;
+  return matrix.map((arr) =>
+    arr.map((el) => {
+      return el === emptyChar ? randomLetter() : el;
+    })
+  );
 }
 
 //  ------------ INSERTION ------------ //
@@ -148,7 +136,6 @@ function validateDiagonalUpInsertion(matrix, str, row, col) {
 
   let initCol = col - 1 + str.length;
   for (const [i, row] of rows.entries()) {
-    console.log(i, row, row[initCol], reversedStr[i]);
     if (!(row[initCol] === emptyChar || row[initCol] === reversedStr[i])) {
       return false;
     }
@@ -432,6 +419,10 @@ e = insertDiagonalUp(e, "mozo", 4, 1);
 e = insertDiagonalUp(e, "moto", 4, 1);
 console.log("");
 console.log(e);
+
+const f = fillEmptyChars(e);
+console.log("");
+console.log(f);
 
 // for (let i = 9, j = 5; i >= 5 || j <= 10; i--, j++) {
 //     console.log(i, j);
