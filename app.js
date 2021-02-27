@@ -18,7 +18,7 @@ function randomLetters(length) {
 
 const randomLetter = () => randomLetters(1);
 
-function fillBlanks(matrix) {
+function fillEmptyChars(matrix) {
   const grid = matrix.length;
 
   console.log(grid);
@@ -97,7 +97,7 @@ function insertVertical(matrix, str, row, col) {
   return newMatrix;
 }
 
-function validatekDiagonalDownInsertion(matrix, str, row, col) {
+function validateDiagonalDownInsertion(matrix, str, row, col) {
   const matrixSize = matrix.length;
   // if str does not fit in the grid, return.
   if (!(str.length <= matrixSize - col && str.length <= matrixSize - row))
@@ -120,7 +120,7 @@ function insertDiagonalDown(matrix, str, row, col) {
     `Diagonal down insertion of -${str}- on row ${row} and col ${col}`
   );
 
-  if (!validatekDiagonalDownInsertion(matrix, str, row, col)) return matrix;
+  if (!validateDiagonalDownInsertion(matrix, str, row, col)) return matrix;
 
   const newMatrix = [...matrix];
 
@@ -136,72 +136,50 @@ function insertDiagonalDown(matrix, str, row, col) {
   return newMatrix;
 }
 
-function validatekDiagonalUpInsertion(matrix, str, row, col) {
-  const grid = matrix.length;
+function validateDiagonalUpInsertion(matrix, str, row, col) {
+  const matrixSize = matrix.length;
 
-  if (!(col >= grid || row >= grid)) {
-    if (str.length <= grid - col && str.length - 1 <= row) {
-      let char = 0;
+  if (!(str.length <= matrixSize - col && str.length - 1 <= row)) return false;
 
-      for (
-        let i = row, j = col;
-        i >= row - str.length - 1 && j <= col + str.length - 1;
-        i--, j++
-      ) {
-        if (!(matrix[i][j] == emptyChar || matrix[i][j] == str[char])) {
-          return false;
-        }
-        char++;
-      }
-    } else {
-      console.log("Tamaño insuficiente");
+  const rowInfLimit = row + 1 - str.length;
+  const rows = matrix.slice(rowInfLimit, row + rowInfLimit);
+
+  const reversedStr = reverse(str);
+
+  let initCol = col - 1 + str.length;
+  for (const [i, row] of rows.entries()) {
+    console.log(i, row, row[initCol], reversedStr[i]);
+    if (!(row[initCol] === emptyChar || row[initCol] === reversedStr[i])) {
       return false;
     }
-    return true;
+    initCol--;
   }
-  console.log("Out of range col or row");
-  return false;
+
+  return true;
 }
-
-// function insertDiagonalUp(matrix, str, row, col) {
-//   console.log("Inserción: diagonal arriba");
-//   console.log(row, col);
-
-//   if (checkDiagonalUp(matrix, row, col, str)) {
-//     let char = 0;
-
-//     for (
-//       let i = row, j = col;
-//       i >= row - str.length - 1 && j <= col + str.length - 1;
-//       i--, j++
-//     ) {
-//       matrix[i][j] = str[char];
-//       char++;
-//     }
-//     return true;
-//   }
-//   return false;
-// }
 
 function insertDiagonalUp(matrix, str, row, col) {
   console.log(`Diagonal up insertion of -${str}- on row ${row} and col ${col}`);
 
-  if (!validatekDiagonalUpInsertion(matrix, str, row, col)) return matrix;
+  if (!validateDiagonalUpInsertion(matrix, str, row, col)) return matrix;
 
-  const newMatrix = [...matrix.reverse()];
-  console.log(newMatrix);
-  const rowRange = row + str.length;
-  console.log(row, rowRange);
-  const rows = newMatrix.slice(row, rowRange);
-  console.log(rows);
+  const newMatrix = [...matrix];
 
-  rows.forEach(function (arr, i) {
-    arr.splice(col, 1, str[i]);
-    col++;
+  const rowInfLimit = row + 1 - str.length;
+  const rows = newMatrix.slice(rowInfLimit, row + rowInfLimit);
+
+  const reversedStr = reverse(str);
+
+  let initCol = col - 1 + str.length;
+  rows.forEach((arr, i) => {
+    arr.splice(initCol, 1, reversedStr[i]);
+    initCol--;
   });
 
-  return newMatrix.reverse();
+  return newMatrix;
 }
+
+// ------- UTILITIES ------- //
 
 function toUpper(values) {
   let newValues = [];
@@ -258,6 +236,8 @@ function reverseSomeRandomValues(values) {
   });
   return newValues;
 }
+
+// --------- RANDOM INSERTION VALUES --------- //
 
 function randomIntFromInterval(min, max) {
   // min and max included
@@ -336,6 +316,8 @@ function getRandomRow(randomNumber) {
   }
 }
 
+// ---------- MAIN FUNCTION ---------- //
+
 function createSoup(grid, values) {
   let s = createGridOfNElements(grid);
 
@@ -391,7 +373,7 @@ function createSoup(grid, values) {
   }
 
   // llenar espacios vacios con letras random
-  ultimateSoup = fillBlanks(s);
+  ultimateSoup = fillEmptyChars(s);
 
   return ultimateSoup;
 }
@@ -446,7 +428,8 @@ e = insertDiagonalDown(e, "ana", 5, 5);
 
 // insertDiagonalUp(e, 'javier', 7, 0);
 // e = insertDiagonalUp(e, "javi", 7, 0);
-e = insertDiagonalUp(e, "motor", 7, 1);
+e = insertDiagonalUp(e, "mozo", 4, 1);
+e = insertDiagonalUp(e, "moto", 4, 1);
 console.log("");
 console.log(e);
 
