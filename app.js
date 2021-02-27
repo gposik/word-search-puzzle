@@ -7,27 +7,6 @@ function createGridOfNElements(size) {
   return myGrid;
 }
 
-function randomLetters(length) {
-  const characters = "abcdefghijklmnopqrstuvwxyz";
-  let result = "";
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
-
-const randomLetter = () => randomLetters(1);
-
-function fillEmptyChars(matrix) {
-  const newMatrix = [...matrix];
-
-  return matrix.map((arr) =>
-    arr.map((el) => {
-      return el === emptyChar ? randomLetter() : el;
-    })
-  );
-}
-
 //  ------------ INSERTION ------------ //
 
 function validateHorizontalInsertion(arr, str, col) {
@@ -168,61 +147,52 @@ function insertDiagonalUp(matrix, str, row, col) {
 
 // ------- UTILITIES ------- //
 
-function toUpper(values) {
-  let newValues = [];
-  values.forEach((v) => {
-    newValues = [...newValues, v.toUpperCase()];
-  });
-  return newValues;
-}
-
-function getValidValues(grid, values) {
-  let newValues = [];
-  values.forEach((v) => {
-    if (v.length <= grid) {
-      newValues = [...newValues, v];
-    }
-  });
-  return newValues;
-}
-
-function shuffle(array) {
-  let currentIndex = array.length,
-    temporaryValue,
-    randomIndex;
-
-  // While there remain elements to shuffle...
-  while (0 !== currentIndex) {
-    // Pick a remaining element...
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex -= 1;
-
-    // And swap it with the current element.
-    temporaryValue = array[currentIndex];
-    array[currentIndex] = array[randomIndex];
-    array[randomIndex] = temporaryValue;
+function randomLetters(length) {
+  const characters = "abcdefghijklmnopqrstuvwxyz";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
   }
-
-  return array;
+  return result;
 }
 
-function reverse(s) {
-  return s.split("").reverse().join("");
+const randomLetter = () => randomLetters(1);
+
+function fillEmptyChars(matrix) {
+  return matrix.map((arr) =>
+    arr.map((el) => {
+      return el === emptyChar ? randomLetter() : el;
+    })
+  );
 }
 
-function reverseSomeRandomValues(values) {
-  let newValues = [];
-  values.forEach((v) => {
-    //value 0 or 1
-    let r = Math.round(Math.random());
-    if (r === 1) {
-      newValues.push(reverse(v));
-    } else {
-      newValues.push(v);
-    }
+const toUpper = (values) => values.map((str) => str.toUpperCase());
+
+const getValidValues = (gridSize, arr) =>
+  arr.filter((str) => str.length <= gridSize);
+
+const shuffle = (array) => array.sort(() => Math.random() - 0.5);
+
+const reverse = (str) => str.split("").reverse().join("");
+
+const reverseRandomValues = (arr) =>
+  arr.map((str) => {
+    let random = Math.round(Math.random());
+    if (random) return reverse(str);
+    return str;
   });
-  return newValues;
-}
+
+const limitAmountOfValues = (gridSize, values) =>
+  values.slice(0, gridSize / 1.2);
+
+const processValues = (gridSize, values) => {
+  const validValues = getValidValues(gridSize, values);
+  const limitValues = validValues.slice(0, gridSize / 1.2);
+  const reversedValues = reverseRandomValues(limitValues);
+  const shuffleValues = shuffle(reversedValues);
+  const upperValues = toUpper(shuffleValues);
+  return upperValues;
+};
 
 // --------- RANDOM INSERTION VALUES --------- //
 
@@ -305,19 +275,33 @@ function getRandomRow(randomNumber) {
 
 // ---------- MAIN FUNCTION ---------- //
 
-function createSoup(grid, values) {
-  let s = createGridOfNElements(grid);
+function createSoup2(gridSize, values) {
+  let soup = createGridOfNElements(gridSize);
+  let newValues = processValues(gridSize, values);
+  let value, random, randomRow, randomCol, randomInsertionMode;
+  while (newValues) {
+    value = newValues.shift();
 
-  // All values to upper case
-  const upperValues = toUpper(values);
-  // Only values that fit on the matrix
-  const validValues = getValidValues(grid, upperValues);
-  // Shuffle values
-  const shuffleValues = shuffle(validValues);
-  // Reverse some values
-  const reversedValues = reverseSomeRandomValues(shuffleValues);
-  // Get only some values to make sure they'll fit on the matrix
-  const limitValues = reversedValues.slice(0, grid / 1.2);
+    // 0,1,2,3
+    random = Math.round(Math.random() * 3);
+    randomInsertionMode = getRandomInsertionMode(random);
+    randomRow = getRandomRow(random)(gridSize, value);
+    randomCol = getRandomCol(random)(gridSize, value);
+
+    soup = randomInsertionMode(soup, value, randomRow, randomCol);
+    console.log(soup);
+    console.log(`Still pending: ${newValues}`);
+    console.log("");
+  }
+
+  soup = fillEmptyChars(soup);
+  return soup;
+}
+
+function createSoup(gridSize, values) {
+  let s = createGridOfNElements(gridSize);
+
+  const newValues = processValues(gridSize, values);
 
   let index = 0;
   let vueltas = 0;
@@ -339,8 +323,8 @@ function createSoup(grid, values) {
       getRandomInsertionMode(r)(
         s,
         v,
-        getRandomRow(r)(grid, v),
-        getRandomCol(r)(grid, v)
+        getRandomRow(r)(gridSize, v),
+        getRandomCol(r)(gridSize, v)
       )
     ) {
       // erased.push(limitValues.splice(index,1));
@@ -387,46 +371,38 @@ const values = [
   "mauricio",
 ];
 
-let e = createGridOfNElements(9);
+// let e = createGridOfNElements(9);
 
-e = insertVertical(e, "eugenias", 0, 0);
+// e = insertVertical(e, "eugenias", 0, 0);
 // e = insertVertical(e, "otomos", 0, 4);
-// e = insertVertical(e, "otomos", 3, 4);
-// e = insertVertical(e, "moses", 3, 4);
-// console.log(e);
 
-e = insertHorizontal(e, "gaston", 1, 0);
-e = insertHorizontal(e, "ogastonios", 1, 0);
-e = insertHorizontal(e, "gas", 1, 5);
-e = insertHorizontal(e, "gastonio", 2, 0);
+// e = insertHorizontal(e, "gaston", 1, 0);
+// e = insertHorizontal(e, "ogastonios", 1, 0);
+// e = insertHorizontal(e, "gas", 1, 5);
+// e = insertHorizontal(e, "gastonio", 2, 0);
 
-insertDiagonalDown(e, "eugenia", 1, 1);
-insertDiagonalDown(e, "seugenia", 0, 0);
-insertDiagonalDown(e, "geniasa", 3, 3);
+// insertDiagonalDown(e, "eugenia", 1, 1);
+// insertDiagonalDown(e, "seugenia", 0, 0);
+// insertDiagonalDown(e, "geniasa", 3, 3);
 
-// checking overlaps:
-// insertHorizontal(e, 'pepipo', 3, 3);
-// insertDiagonalDown(e, 'pepipo', 3, 3 );
-// insertVertical(e, 'pepipo', 1, 5);
-
-e = insertDiagonalDown(e, "tomas", 2, 3);
-e = insertDiagonalDown(e, "sara", 2, 2);
-e = insertDiagonalDown(e, "ana", 5, 5);
+// e = insertDiagonalDown(e, "tomas", 2, 3);
+// e = insertDiagonalDown(e, "sara", 2, 2);
+// e = insertDiagonalDown(e, "ana", 5, 5);
 
 // insertDiagonalUp(e, 'javier', 7, 0);
 // e = insertDiagonalUp(e, "javi", 7, 0);
-e = insertDiagonalUp(e, "mozo", 4, 1);
-e = insertDiagonalUp(e, "moto", 4, 1);
-console.log("");
-console.log(e);
+// e = insertDiagonalUp(e, "mozo", 4, 1);
+// e = insertDiagonalUp(e, "moto", 4, 1);
+// console.log("");
+// console.log(e);
 
-const f = fillEmptyChars(e);
-console.log("");
-console.log(f);
+// const f = fillEmptyChars(e);
+// console.log("");
+// console.log(f);
 
-// for (let i = 9, j = 5; i >= 5 || j <= 10; i--, j++) {
-//     console.log(i, j);
-// };
+// console.log(toUpper(values));
+// console.log(getValidValues(9, values));
+// console.log(reverseRandomValues(values));
 
-// s = createSoup(13, values);
-// console.log(s);
+s = createSoup2(13, values);
+console.log(s);
