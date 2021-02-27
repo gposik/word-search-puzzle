@@ -19,8 +19,8 @@ function validateHorizontalInsertion(arr, str, col) {
     if (!(char === emptyChar || char === str[i])) {
       return false;
     }
-    return true;
   }
+  return true;
 }
 
 const insertHorizontal = (matrix, str, row, col) => {
@@ -46,14 +46,13 @@ function validateVerticalInsertion(matrix, str, row, col) {
       return false;
     }
   }
-
   return true;
 }
 
 function insertVertical(matrix, str, row, col) {
   console.log(`Vertical insertion of -${str}- on row ${row} and col ${col}`);
 
-  if (!validateVerticalInsertion(matrix, str, row, col)) return false;
+  if (!validateVerticalInsertion(matrix, str, row, col)) return matrix;
 
   const newMatrix = [...matrix];
 
@@ -105,23 +104,32 @@ function insertDiagonalDown(matrix, str, row, col) {
 
 function validateDiagonalUpInsertion(matrix, str, row, col) {
   const matrixSize = matrix.length;
-
-  if (!(str.length <= matrixSize - col && str.length - 1 <= row)) return false;
-
-  const rowInfLimit = row + 1 - str.length;
-  const rows = matrix.slice(rowInfLimit, row + rowInfLimit);
-
-  const reversedStr = reverse(str);
-
-  let initCol = col - 1 + str.length;
-  for (const [i, row] of rows.entries()) {
-    if (!(row[initCol] === emptyChar || row[initCol] === reversedStr[i])) {
+  if (!(col >= matrixSize || row >= matrixSize)) {
+    if (!(str.length <= matrixSize - col && str.length - 1 <= row))
       return false;
-    }
-    initCol--;
-  }
 
-  return true;
+    const rowInfLimit = row + 1 - str.length;
+    const rowSupLimit = rowInfLimit + str.length;
+    const rows = matrix.slice(rowInfLimit, rowSupLimit);
+    console.log(`Inferior limit: ${rowInfLimit}`);
+    console.log(`Superior limit: ${rowSupLimit}`);
+    console.log(rows);
+
+    const reversedStr = reverse(str);
+
+    let initCol = col - 1 + str.length;
+    for (const [i, row] of rows.entries()) {
+      console.log(
+        `actual char ${row[initCol]}, char trying to fit ${reversedStr[i]}`
+      );
+      if (!(row[initCol] === emptyChar || row[initCol] === reversedStr[i])) {
+        return false;
+      }
+      initCol--;
+    }
+    return true;
+  }
+  return false;
 }
 
 function insertDiagonalUp(matrix, str, row, col) {
@@ -132,7 +140,8 @@ function insertDiagonalUp(matrix, str, row, col) {
   const newMatrix = [...matrix];
 
   const rowInfLimit = row + 1 - str.length;
-  const rows = newMatrix.slice(rowInfLimit, row + rowInfLimit);
+  const rowSupLimit = rowInfLimit + str.length;
+  const rows = newMatrix.slice(rowInfLimit, rowSupLimit);
 
   const reversedStr = reverse(str);
 
@@ -161,7 +170,7 @@ const randomLetter = () => randomLetters(1);
 function fillEmptyChars(matrix) {
   return matrix.map((arr) =>
     arr.map((el) => {
-      return el === emptyChar ? randomLetter() : el;
+      return el === emptyChar ? randomLetter().toUpperCase() : el;
     })
   );
 }
@@ -186,11 +195,11 @@ const limitAmountOfValues = (gridSize, values) =>
   values.slice(0, gridSize / 1.2);
 
 const processValues = (gridSize, values) => {
-  const validValues = getValidValues(gridSize, values);
-  const limitValues = validValues.slice(0, gridSize / 1.2);
-  const reversedValues = reverseRandomValues(limitValues);
-  const shuffleValues = shuffle(reversedValues);
-  const upperValues = toUpper(shuffleValues);
+  const shuffleValues = shuffle(values);
+  const validValues = getValidValues(gridSize, shuffleValues);
+  const limitedValues = limitAmountOfValues(gridSize, validValues);
+  const reversedValues = reverseRandomValues(limitedValues);
+  const upperValues = toUpper(reversedValues);
   return upperValues;
 };
 
@@ -278,9 +287,9 @@ function getRandomRow(randomNumber) {
 function createSoup2(gridSize, values) {
   let soup = createGridOfNElements(gridSize);
   let newValues = processValues(gridSize, values);
-  let value, random, randomRow, randomCol, randomInsertionMode;
-  while (newValues) {
-    value = newValues.shift();
+  let value, random, randomRow, randomCol, randomInsertionMode, oldSoup;
+  while (newValues.length) {
+    value = newValues[0];
 
     // 0,1,2,3
     random = Math.round(Math.random() * 3);
@@ -288,9 +297,17 @@ function createSoup2(gridSize, values) {
     randomRow = getRandomRow(random)(gridSize, value);
     randomCol = getRandomCol(random)(gridSize, value);
 
-    soup = randomInsertionMode(soup, value, randomRow, randomCol);
+    oldSoup = [...soup];
+    soup = randomInsertionMode(oldSoup, value, randomRow, randomCol);
+    if (soup !== oldSoup) {
+      console.log(`Se insertó el elemento correctamente`);
+      newValues.shift();
+    } else {
+      console.log(`No se pudo insertar el elemento`);
+    }
+
     console.log(soup);
-    console.log(`Still pending: ${newValues}`);
+    console.log(newValues);
     console.log("");
   }
 
@@ -404,5 +421,5 @@ const values = [
 // console.log(getValidValues(9, values));
 // console.log(reverseRandomValues(values));
 
-s = createSoup2(13, values);
+const s = createSoup2(13, values);
 console.log(s);
