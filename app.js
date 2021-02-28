@@ -284,7 +284,7 @@ function getRandomRow(randomNumber) {
 
 // ---------- MAIN FUNCTION ---------- //
 
-function createSoup2(gridSize, values) {
+function createSoup(gridSize, values) {
   let soup = createGridOfNElements(gridSize);
   let newValues = processValues(gridSize, values);
   let value, random, randomRow, randomCol, randomInsertionMode, oldSoup;
@@ -311,60 +311,10 @@ function createSoup2(gridSize, values) {
     console.log("");
   }
 
-  soup = fillEmptyChars(soup);
-  return soup;
+  return fillEmptyChars(soup);
 }
 
-function createSoup(gridSize, values) {
-  let s = createGridOfNElements(gridSize);
-
-  const newValues = processValues(gridSize, values);
-
-  let index = 0;
-  let vueltas = 0;
-
-  let erased = [];
-
-  while (limitValues.length > 0 && vueltas != 200) {
-    console.log("Elementos restantes: ", limitValues);
-    // console.log('Elementos borrados: ', erased);
-    console.log("Ronda nº:", vueltas);
-
-    let v = limitValues[index];
-    console.log("Elemento a insertar:", v);
-
-    //value 0, 1, 2 or 3;
-    let r = Math.round(Math.random() * 3);
-
-    if (
-      getRandomInsertionMode(r)(
-        s,
-        v,
-        getRandomRow(r)(gridSize, v),
-        getRandomCol(r)(gridSize, v)
-      )
-    ) {
-      // erased.push(limitValues.splice(index,1));
-      limitValues.splice(index, 1);
-      console.log("Exito!!");
-    } else {
-      console.log("No se pudo..");
-    }
-
-    vueltas++;
-    index++;
-
-    if (index >= limitValues.length) {
-      index = 0;
-    }
-    console.log(s);
-  }
-
-  // llenar espacios vacios con letras random
-  ultimateSoup = fillEmptyChars(s);
-
-  return ultimateSoup;
-}
+// -------------------------------------- //
 
 const values = [
   "pedro",
@@ -421,5 +371,5 @@ const values = [
 // console.log(getValidValues(9, values));
 // console.log(reverseRandomValues(values));
 
-const s = createSoup2(13, values);
+const s = createSoup(13, values);
 console.log(s);
